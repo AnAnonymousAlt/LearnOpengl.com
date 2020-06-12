@@ -1,12 +1,14 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
-// #include "../include/Helper_functions.h"
+#include "../include/Helper_functions.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 using namespace std;
+
+
 
 enum VAO_ID
 {
@@ -43,74 +45,45 @@ void processInput ( GLFWwindow *window )
 	}
 }
 
-GLfloat triangle[3][2] =
-{
-	{ 0.0, 0.0 },
-	{ 0.3, 0.0 },
-	{ 0.0, 0.3 }
-};
+
 void init ()
 {
+	// Load shader
 	GLuint program = glCreateProgram ();
 	GLuint vShader = glCreateShader ( GL_VERTEX_SHADER );
 	GLuint fShader = glCreateShader ( GL_FRAGMENT_SHADER );
-
-	//const GLfloat triangle[numVertex][numElement] =
-	//{
-	//	{ -0.5f, -0.5f },
-	//	{  0.5f, -0.5f },
-	//	{ -0.5f,  0.5f }
-	//};
-
-	//glCreateVertexArrays ( numVAOs, VAOs );
-	//glCreateBuffers ( numBuffers, buffers );
-
-	//glBindVertexArray ( VAOs[Triangle] );
-
-	//glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
-	
-	glCreateVertexArrays ( numVAOs, VAOs );
-	glCreateBuffers ( numBuffers, buffers );
-
-	ifstream vfs = ifstream ( "vertex.glsl" );
-	string vs = string ( istreambuf_iterator<char> ( vfs ),
-						 istreambuf_iterator<char> () );
-	const char *vt = vs.c_str ();
-	GLint vl = vs.length ();
-	glShaderSource ( vShader, 1, &vt, &vl );
-	glCompileShader ( vShader );
-
-	ifstream ffs = ifstream ( "fragment.glsl" );
-	string fs = string ( istreambuf_iterator<char> ( ffs ),
-						 istreambuf_iterator<char> () );
-	const char *ft = fs.c_str ();
-	GLint fl = fs.length ();
-	glShaderSource ( fShader, 1, &ft, &fl );
-	glCompileShader ( fShader );
-
-	//shaderloader ( vShader, "vertex.glsl" );
-	//shaderloader ( fShader, "fragment.glsl" );
+	shaderloader ( vShader, "" );
+	shaderloader ( fShader, "fragment.glsl" );
 
 	glAttachShader ( program, vShader );
 	glAttachShader ( program, fShader );
 	glLinkProgram ( program );
 	glUseProgram ( program );
+	// Load Shader ends
 
-	//glClearColor ( 0.0f, 0.1f, 0.3f, 1.0f );
+	// load VAO
+	const GLfloat triangle[numVertex][numElement] =
+	{
+		{ -0.5f, -0.5f },
+		{  0.5f, -0.5f },
+		{ -0.5f,  0.5f }
+	};
 
-	//glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
-	///*glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE, 
-	//						numVertex * typeSize(GL_FLOAT_VEC2), bufferOffset(0));*/
-	//glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE,
-	//						0, (void*) 0 );
-	//glEnableVertexAttribArray ( vPosition );
+	glCreateVertexArrays ( numVAOs, VAOs );
+	glCreateBuffers ( numBuffers, buffers );
 
 	glBindVertexArray ( VAOs[Triangle] );
-	glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
+
 	glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
 
-	glVertexAttribPointer ( vPosition, 2, GL_FLOAT, GL_FALSE, 0, (void *) ( 0 ) );
+	glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
+	glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE, 
+							typeSize(GL_FLOAT_VEC2), bufferOffset(0));
 	glEnableVertexAttribArray ( vPosition );
+	// load VAO ends
+
+	// Set GL variable
+	glClearColor ( 0.0f, 0.1f, 0.3f, 1.0f );
 
 }
 
@@ -141,8 +114,8 @@ main ( int argc, char **argv )
 	// variable init has to be put after glfwMakeContextCurrent call
 	init ();
 
-	// glViewport ( 0, 0, 640, 480 );
-	// glfwSetFramebufferSizeCallback ( window, frameBufferSizeCallback );
+	glViewport ( 0, 0, 640, 480 );
+	glfwSetFramebufferSizeCallback ( window, frameBufferSizeCallback );
 
 	while ( !glfwWindowShouldClose ( window ) )
 	{

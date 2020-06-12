@@ -20,9 +20,32 @@ void Debugger::print (const char *info, ERROR_TYPE error,
 		<< std::endl;
 }
 
+void Debugger::print ( char *info, ERROR_TYPE error,
+					   const char *funcName, int line, const char *fileName )
+{
+	std::cerr
+		<< "ERROR: \""						// ERROR: "
+		<< info								// INFO
+		<< "\", CODE: \""					// ", CODE: "
+		<< errorTypeTranslater ( error )	// error type
+		<< " "								// 
+		<< ( int ) error					// error_code
+		<< "\", at function: \""			// ", at function: "
+		<< funcName							// function name
+		<< "\", \nin file: \""				// ", in file "
+		<< fileName							// filename
+		<< "\" line: "						// " line: 
+		<< line								// line number
+		<< std::endl;
+}
 
 std::string Debugger::errorTypeTranslater ( ERROR_TYPE error )
 {
+	#define CASE(Enum, code) \
+	case Enum: \
+		return std::string(code); \
+		break
+
 	switch ( error )
 	{
 	case ERROR_TYPE::Nullptr:
@@ -37,9 +60,12 @@ std::string Debugger::errorTypeTranslater ( ERROR_TYPE error )
 	case ERROR_TYPE::FileNotExit:
 		return std::string ( "FileNotExit" );
 		break;
+	case ERROR_TYPE::InvalidShader:
+		return std::string ( "InvalidShader" );
+		break;
+	CASE ( ERROR_TYPE::EmptyString, "EmptyString" );
 	default:
 		return std::string ( "UndefinedERROR" );
-
 	}
 }
 
@@ -74,14 +100,37 @@ std::string fileloader ( const char *filename, GLint *length )
 	return s;
 }
 
+#define DEBUG(errorCondition, code) \
+if ( errorCondition ) \
+{ \
+	Debugger::print ( "", code, __FUNCTION__, __LINE__, __FILE__ );  \
+	exit ( EXIT_FAILURE ); \
+} \
+
+
 void shaderloader ( GLuint shader, const char *filename )
 {
+	DEBUG ( !glIsShader ( shader ), ERROR_TYPE::InvalidShader );
+
+	DEBUG ( filename == "", ERROR_TYPE::EmptyString );
+
+	
 	GLint length;
 	const char *text;
 	std::string s = fileloader ( filename, &length ).c_str();
+	DEBUG ( s.empty (), ERROR_TYPE::FileNotExit );
 	text = s.c_str ();
 	glShaderSource ( shader, 1, &text, &length );
 	glCompileShader ( shader );
+	GLint status;
+	glGetShaderiv ( shader, GL_COMPILE_STATUS, &status );
+	if ( !status )
+	{
+		char *errorLog = ( char * ) malloc ( ( size_t ) 512 );
+		glGetShaderInfoLog ( shader, ( GLsizei ) 512, NULL, errorLog );
+		perr ( errorLog, ERROR_TYPE::CompileError );
+		exit ( EXIT_FAILURE );
+	}
 	return;
 }
 
