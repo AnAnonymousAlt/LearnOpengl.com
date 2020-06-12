@@ -1,50 +1,33 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
-#include "Helperfunctions.h"
+// #include "../include/Helper_functions.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
+using namespace std;
 
-//enum ERROR_TYPE
-//{
-//	null
-//};
-//
-//void bugOut (const char *string, int )
-
-const char *fileloader ( const char *filename, GLint *length)
+enum VAO_ID
 {
-	if ( length == NULL )
-	{
-		std::cerr << "fileloader: length is NULL" << std::endl;
-		exit ( EXIT_FAILURE );
-	}
-	if ( filename == NULL )
-	{
-		
-	}
-	std::ifstream fs ( filename );
-	std::string s = std::string ( std::istreambuf_iterator<char> ( fs ), std::istreambuf_iterator<char> () );
-	
-	*length = s.length ();
-	return s.c_str ();
-}
+	Triangle, numVAOs
+};
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="shader">a created shader name</param>
-/// <param name="filename">shader file name in const C string</param>
-void shaderloader ( GLuint shader, const char *filename )
+enum Buffer_ID
 {
-	GLint length;
-	const char *text = fileloader ( filename, &length );
-	glShaderSource ( shader, 1, &text, &length );
-	glCompileShader ( shader );
-	return;
-}
+	ArrayBuffer, numBuffers
+};
+
+enum ATTRIB_ID
+{
+	vPosition
+};
+
+GLuint VAOs[numVAOs];
+GLuint buffers[numBuffers];
+
+const GLint numVertex = 3; // num of total vertices
+const GLint numElement = 2; // num of element in a vector
 
 void frameBufferSizeCallback ( GLFWwindow *window, int width, int height )
 {
@@ -60,24 +43,92 @@ void processInput ( GLFWwindow *window )
 	}
 }
 
+GLfloat triangle[3][2] =
+{
+	{ 0.0, 0.0 },
+	{ 0.3, 0.0 },
+	{ 0.0, 0.3 }
+};
 void init ()
 {
-	glClearColor ( 1.0f, 0.1f, 0.3f, 1.0f );
+	GLuint program = glCreateProgram ();
+	GLuint vShader = glCreateShader ( GL_VERTEX_SHADER );
+	GLuint fShader = glCreateShader ( GL_FRAGMENT_SHADER );
+
+	//const GLfloat triangle[numVertex][numElement] =
+	//{
+	//	{ -0.5f, -0.5f },
+	//	{  0.5f, -0.5f },
+	//	{ -0.5f,  0.5f }
+	//};
+
+	//glCreateVertexArrays ( numVAOs, VAOs );
+	//glCreateBuffers ( numBuffers, buffers );
+
+	//glBindVertexArray ( VAOs[Triangle] );
+
+	//glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
+	
+	glCreateVertexArrays ( numVAOs, VAOs );
+	glCreateBuffers ( numBuffers, buffers );
+
+	ifstream vfs = ifstream ( "vertex.glsl" );
+	string vs = string ( istreambuf_iterator<char> ( vfs ),
+						 istreambuf_iterator<char> () );
+	const char *vt = vs.c_str ();
+	GLint vl = vs.length ();
+	glShaderSource ( vShader, 1, &vt, &vl );
+	glCompileShader ( vShader );
+
+	ifstream ffs = ifstream ( "fragment.glsl" );
+	string fs = string ( istreambuf_iterator<char> ( ffs ),
+						 istreambuf_iterator<char> () );
+	const char *ft = fs.c_str ();
+	GLint fl = fs.length ();
+	glShaderSource ( fShader, 1, &ft, &fl );
+	glCompileShader ( fShader );
+
+	//shaderloader ( vShader, "vertex.glsl" );
+	//shaderloader ( fShader, "fragment.glsl" );
+
+	glAttachShader ( program, vShader );
+	glAttachShader ( program, fShader );
+	glLinkProgram ( program );
+	glUseProgram ( program );
+
+	//glClearColor ( 0.0f, 0.1f, 0.3f, 1.0f );
+
+	//glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
+	///*glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE, 
+	//						numVertex * typeSize(GL_FLOAT_VEC2), bufferOffset(0));*/
+	//glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE,
+	//						0, (void*) 0 );
+	//glEnableVertexAttribArray ( vPosition );
+
+	glBindVertexArray ( VAOs[Triangle] );
+	glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
+	glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
+
+	glVertexAttribPointer ( vPosition, 2, GL_FLOAT, GL_FALSE, 0, (void *) ( 0 ) );
+	glEnableVertexAttribArray ( vPosition );
+
 }
 
 void display ()
 {
 	glClear ( GL_COLOR_BUFFER_BIT );
 
+	glBindVertexArray ( VAOs[Triangle] );
+	glDrawArrays ( GL_TRIANGLES, 0, 3 );
 }
 
 int
 main ( int argc, char **argv )
 {
-	EC.out ();
+
 	glfwInit ();
-	
-	GLFWwindow *window = glfwCreateWindow (640, 480, "Window", NULL, NULL);
+
+	GLFWwindow *window = glfwCreateWindow ( 640, 480, "Window", NULL, NULL );
 	if ( window == NULL )
 	{
 		std::cout << "Failed to create GLFW window." << std::endl;
@@ -90,8 +141,8 @@ main ( int argc, char **argv )
 	// variable init has to be put after glfwMakeContextCurrent call
 	init ();
 
-	glViewport ( 0, 0, 640, 480 );
-	glfwSetFramebufferSizeCallback ( window, frameBufferSizeCallback );
+	// glViewport ( 0, 0, 640, 480 );
+	// glfwSetFramebufferSizeCallback ( window, frameBufferSizeCallback );
 
 	while ( !glfwWindowShouldClose ( window ) )
 	{
@@ -100,7 +151,7 @@ main ( int argc, char **argv )
 		// rendering
 		display ();
 		// swap buffer
-		glfwSwapBuffers (window);
+		glfwSwapBuffers ( window );
 		// check and call events
 		glfwPollEvents ();
 	}

@@ -6,6 +6,7 @@ void mf ()
 	perr ( "info", ERROR_TYPE::Nullptr );
 	exit ( EXIT_FAILURE );
 }
+
 int main ( int argc, char **argv )
 {
 	mf ();
