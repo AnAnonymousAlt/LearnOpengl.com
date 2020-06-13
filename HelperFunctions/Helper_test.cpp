@@ -1,17 +1,26 @@
 #include "../include/Helper_functions.h"
 
-void mf ()
+Model f ()
 {
-	// Debugger::print ( "", ERROR_TYPE::Nullptr, __FUNCTION__, __FILE__ );
-	perr ( "info", ERROR_TYPE::Nullptr );
-	exit ( EXIT_FAILURE );
+	Model mo;
+	Matrix ma;
+
+	glm::vec4 v = glm::vec4 ( 1.0f, 1.0f, 0.0f, 1.0f );
+
+	mo.addMatrix ( ma );
+
+	ma.addVertex ( v );
+
+	mo.addMatrix ( ma );
+
+	return mo;
 }
 
 int main ( int argc, char **argv )
 {
-	mf ();
 
-	// perr ( "info", ERROR_TYPE::Nullptr );
+	Model mo = Helper::vertexLoader ( "Vertex.vi" );
 
 	return EXIT_SUCCESS;
+
 }

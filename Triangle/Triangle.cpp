@@ -1,13 +1,4 @@
-#include <GL/gl3w.h>
-#include <GLFW/glfw3.h>
-
 #include "../include/Helper_functions.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-using namespace std;
-
 
 
 enum VAO_ID
@@ -48,27 +39,25 @@ void processInput ( GLFWwindow *window )
 
 void init ()
 {
+	std::vector<glm::vec4> *matrixes = NULL;
+	Helper::vertexLoader ( matrixes, "Triangle.vi" );
+
+
 	// Load shader
 	GLuint program = glCreateProgram ();
 	GLuint vShader = glCreateShader ( GL_VERTEX_SHADER );
 	GLuint fShader = glCreateShader ( GL_FRAGMENT_SHADER );
-	shaderloader ( vShader, "" );
-	shaderloader ( fShader, "fragment.glsl" );
+	Helper::shaderloader ( vShader, "vertex.glsl" );
+	Helper::shaderloader ( fShader, "fragment.glsl" );
 
 	glAttachShader ( program, vShader );
 	glAttachShader ( program, fShader );
 	glLinkProgram ( program );
 	glUseProgram ( program );
+
 	// Load Shader ends
 
-	// load VAO
-	const GLfloat triangle[numVertex][numElement] =
-	{
-		{ -0.5f, -0.5f },
-		{  0.5f, -0.5f },
-		{ -0.5f,  0.5f }
-	};
-
+	//// load VAO
 	glCreateVertexArrays ( numVAOs, VAOs );
 	glCreateBuffers ( numBuffers, buffers );
 
@@ -76,9 +65,10 @@ void init ()
 
 	glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
 
-	glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( triangle ), &triangle, GL_DYNAMIC_STORAGE_BIT );
+	/*glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( ), 
+						   &(matrixes[0]), GL_DYNAMIC_STORAGE_BIT );*/
 	glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE, 
-							typeSize(GL_FLOAT_VEC2), bufferOffset(0));
+							Helper::typeSize(GL_FLOAT_VEC2), bufferOffset(0));
 	glEnableVertexAttribArray ( vPosition );
 	// load VAO ends
 
