@@ -12,38 +12,12 @@
 
 
 
-class Matrix
+
+
+enum VEC_SIZE
 {
-public:
-	Matrix ();
-	bool addName ( std::string name );
-	bool addVertex ( glm::vec4 vertex );
-	int length ();
-	std::string getName ();
-	std::vector<glm::vec4> getVector ();
-	glm::vec4 getVertex ( int num );
-	void *getPointer ();
-private:
-	std::string name;
-	std::vector<glm::vec4> vertices;
+	VEC1 = 1, VEC2 = 2, VEC3 = 3, VEC4 = 4
 };
-
-
-class Model
-{
-public:
-	Model ();
-	int length ();
-	Matrix getMatrix ( int number );
-	std::string getName ();
-	bool addMatrix ( Matrix matrix );
-	bool addName ( std::string name );
-	std::vector< Matrix > getModel ();
-private:
-	std::vector< Matrix > matrixes;
-	std::string name;
-};
-
 
 /// <summary>
 /// Enum of Error Type
@@ -74,6 +48,44 @@ if ( errorCondition ) \
 #define DEBUGP(error, code)\
 Helper::print ( error, code, __FUNCTION__, __LINE__, __FILE__ );  \
 exit ( EXIT_FAILURE ); \
+
+
+class Matrix
+{
+public:
+	Matrix ();
+	bool addName ( std::string name );
+	bool addVertex ( glm::vec4 vertex );
+	int vSize ();
+	int eSize ();
+	std::string getName ();
+	std::vector<glm::vec4> getVector ();
+	glm::vec4 getVertex ( int num );
+	void *getVAddress ();
+	void *getEAddress ();
+	glm::ivec3 getElement ( int num );
+	bool addElement ( glm::ivec3 element );
+	std::vector< glm::ivec3 > getElementArray ();
+	std::string name;
+	std::vector<glm::vec4> vertices;
+	std::vector< glm::ivec3 > elements;
+	
+};
+
+
+class Model
+{
+public:
+	Model ();
+	int length ();
+	Matrix getMatrix ( int number );
+	std::string getName ();
+	bool addMatrix ( Matrix matrix );
+	bool addName ( std::string name );
+	std::vector< Matrix > getModel ();
+	std::vector< Matrix > matrixes;
+	std::string name;
+};
 
 /// <summary>
 /// Buffer offset
@@ -124,6 +136,9 @@ public:
 	/// <param name="matrixes"></param>
 	/// <param name="filename"></param>
 	static Model vertexLoader ( const char *filename );
+
+	static void elementLoader ( Model *model, const char *filename );
+
 
 	/// <summary>
 	/// Return size of the GL type

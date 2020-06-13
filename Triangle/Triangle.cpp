@@ -19,9 +19,6 @@ enum ATTRIB_ID
 GLuint VAOs[numVAOs];
 GLuint buffers[numBuffers];
 
-const GLint numVertex = 3; // num of total vertices
-const GLint numElement = 2; // num of element in a vector
-
 void frameBufferSizeCallback ( GLFWwindow *window, int width, int height )
 {
 	glViewport ( 0, 0, width, height );
@@ -39,8 +36,9 @@ void processInput ( GLFWwindow *window )
 
 void init ()
 {
-	std::vector<glm::vec4> *matrixes = NULL;
-	Helper::vertexLoader ( matrixes, "Triangle.vi" );
+
+	Model mo = Helper::vertexLoader ( "Triangle.vi" );
+	Matrix ma = mo.matrixes[Triangle];
 
 
 	// Load shader
@@ -65,15 +63,18 @@ void init ()
 
 	glBindBuffer ( GL_ARRAY_BUFFER, buffers[ArrayBuffer] );
 
-	/*glNamedBufferStorage ( buffers[ArrayBuffer], sizeof ( ), 
-						   &(matrixes[0]), GL_DYNAMIC_STORAGE_BIT );*/
-	glVertexAttribPointer ( vPosition, numElement, GL_FLOAT, GL_FALSE, 
-							Helper::typeSize(GL_FLOAT_VEC2), bufferOffset(0));
+
+	glNamedBufferStorage ( buffers[ArrayBuffer], 
+						   Helper::typeSize(GL_FLOAT_VEC4) * ma.vSize(),
+						   ma.getAddress(), GL_DYNAMIC_STORAGE_BIT );
+	glVertexAttribPointer ( vPosition, VEC_SIZE::VEC4,
+							GL_FLOAT, GL_FALSE, Helper::typeSize ( GL_FLOAT_VEC4 ), 
+							bufferOffset ( 0 ) );
 	glEnableVertexAttribArray ( vPosition );
 	// load VAO ends
 
 	// Set GL variable
-	glClearColor ( 0.0f, 0.1f, 0.3f, 1.0f );
+	glClearColor ( 0.0f, 0.1f, 0.1f, 1.0f );
 
 }
 

@@ -112,13 +112,14 @@ Model Helper::vertexLoader ( const char *filename )
 {
 	GLint length, numMatrixes, numVertices, numElements;
 	Model mo;
-	
-	std::string s = fileLoader (filename, &length);
+
+	std::string s = fileLoader ( filename, &length );
 	std::istringstream iss ( s, std::ios_base::in );
 	std::string ModelName;
 
 	// Get number of matrixes and filename
 	iss >> numMatrixes >> ModelName;
+	mo.addName ( ModelName );
 
 	// read matrixes
 	for ( int matrix_num = 0; matrix_num < numMatrixes; matrix_num++ )
@@ -128,12 +129,12 @@ Model Helper::vertexLoader ( const char *filename )
 
 		iss >> numVertices >> numElements >> matrixName;
 		ma.addName ( matrixName );
-		
+
 		// read vertices
 		for ( int vertex_num = 0; vertex_num < numVertices; vertex_num++ )
 		{
 			std::vector<GLfloat> vertex_;
-			
+
 			// Read element
 			for ( int element_num = 0; element_num < numElements; element_num++ )
 			{
@@ -146,19 +147,44 @@ Model Helper::vertexLoader ( const char *filename )
 			{
 				vertex_.push_back ( 0.0f );
 				vertex_.push_back ( 1.0f );
-			}
-			else if ( numElements == 3 )
+			} else if ( numElements == 3 )
 			{
 				vertex_.push_back ( 1.0f );
 			}
 			glm::vec4 vertex ( vertex_[0], vertex_[1], vertex_[2], vertex_[3] );
 			ma.addVertex ( vertex );
 		}
-
 		mo.addMatrix ( ma );
-		
+
 	}
 	return mo;
+}
+
+void Helper::elementLoader ( Model *model, const char *filename )
+{
+	GLint length, numMatrixes, numVertices, numElements;
+	std::string s = fileLoader ( filename, &length );
+	std::istringstream iss ( s, std::ios_base::in );
+	std::string ModelName;
+	iss >> numMatrixes >> ModelName;
+
+	// read matrix
+	for ( int matrix_num = 0; matrix_num < numMatrixes; matrix_num++ )
+	{
+		std::string matrixName;
+		iss >> numVertices >> numElements >> matrixName;
+
+
+		// read vertices
+		for ( int vertex_num = 0; vertex_num < numVertices; vertex_num++ )
+		{
+			int row_[3];
+			// Read element
+			iss >> row_[0] >> row_[1] >> row_[2];
+			glm::ivec3 row ( row_[0], row_[1], row_[2] );
+			model->matrixes[matrix_num].addElement ( row );
+		}
+	}
 }
 
 
@@ -230,7 +256,7 @@ bool Model::addName ( std::string name )
 
 bool Model::addMatrix ( Matrix matrix )
 {
-	this->matrixes.push_back(matrix);
+	this->matrixes.push_back ( matrix );
 	return true;
 }
 
@@ -264,9 +290,14 @@ bool Matrix::addVertex ( glm::vec4 vertex )
 	return true;
 }
 
-int Matrix::length ()
+int Matrix::vSize ()
 {
-	return (int)this->vertices.size ();
+	return ( int ) this->vertices.size ();
+}
+
+int Matrix::eSize ()
+{
+	return ( int ) elements.size ();
 }
 
 
@@ -286,7 +317,28 @@ glm::vec4 Matrix::getVertex ( int num )
 	return vertices[num];
 }
 
-void *Matrix::getPointer ()
+void *Matrix::getVAddress ()
 {
 	return &vertices[0];
+}
+
+void *Matrix::getEAddress ()
+{
+	return &elements[0];
+}
+
+glm::ivec3 Matrix::getElement ( int num )
+{
+	return elements[num];
+}
+
+bool Matrix::addElement ( glm::ivec3 element )
+{
+	this->elements.push_back ( element );
+	return true;
+}
+
+std::vector<glm::ivec3> Matrix::getElementArray ()
+{
+	return elements;
 }
