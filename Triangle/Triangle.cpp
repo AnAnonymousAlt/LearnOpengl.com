@@ -66,7 +66,7 @@ void init ()
 
 	glNamedBufferStorage ( buffers[ArrayBuffer], 
 						   Helper::typeSize(GL_FLOAT_VEC4) * ma.vSize(),
-						   ma.getAddress(), GL_DYNAMIC_STORAGE_BIT );
+						   ma.getVAddress(), GL_DYNAMIC_STORAGE_BIT );
 	glVertexAttribPointer ( vPosition, VEC_SIZE::VEC4,
 							GL_FLOAT, GL_FALSE, Helper::typeSize ( GL_FLOAT_VEC4 ), 
 							bufferOffset ( 0 ) );
