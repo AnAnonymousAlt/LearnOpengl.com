@@ -206,6 +206,7 @@ std::string Helper::errorTranslater ( ERROR_TYPE error )
 		CASE ( ERROR_TYPE::InvalidShader, "InvalidShader" );
 		CASE ( ERROR_TYPE::EmptyMatrixVertex, "EmptyMatrixVertex" );
 		CASE ( ERROR_TYPE::GLFWFail, "GLFWFail" );
+		CASE ( ERROR_TYPE::WindowFail, "WindowFail" );
 		#undef CASE
 	default:
 		return std::string ( "UndefinedERROR" );
@@ -494,7 +495,7 @@ std::vector<glm::uvec3> Matrix::getElementArray ()
 	return elements;
 }
 
-void Color::glClearColorfv (const glm::vec4 color)
+void glClearColorfv (const glm::vec4 color)
 {
 	glClearColor (color.r, color.g, color.b, color.a);
 }

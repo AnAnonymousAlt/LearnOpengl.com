@@ -17,7 +17,6 @@ enum ATTRIB_ID
 	vPosition
 };
 
-constexpr auto ClearBit = 0;
 
 GLuint VAOs[numVAOs];
 GLuint buffers[numBuffers];
@@ -143,7 +142,7 @@ init ()
 
 
 	// glClearColor ( 0.1f, 0.0f, 0.1f, 1.0f );
-	Color::glClearColorfv ( Color::darkcyan );
+	glClearColorfv ( Color::darkcyan );
 
 }
 

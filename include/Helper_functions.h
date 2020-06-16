@@ -10,10 +10,15 @@
 #include <string>
 #include <vector>
 
+/// <summary>
+/// use vec4 set clear color
+/// </summary>
+/// <param name="color"></param>
+void glClearColorfv ( glm::vec4 color );
+
 class Color
 {
 public:
-	static void glClearColorfv ( const glm::vec4 color );
 	// https://web.archive.org/web/20180301041827/https://prideout.net/archive/colors.php#Sample
 	static const glm::vec4 aliceblue;
 	static const glm::vec4 antiquewhite;
@@ -164,6 +169,7 @@ public:
 	static const glm::vec4 yellowgreen;
 };
 
+constexpr int ClearBit = 0;
 
 enum VEC_SIZE
 {
@@ -177,7 +183,7 @@ enum class ERROR_TYPE
 {
 	NullPtr, LinkError, CompileError, FileNotExit,
 	InvalidShader, EmptyString, EmptyMatrixVertex,
-	GLFWFail
+	GLFWFail, WindowFail
 };
 
 /// DEBUG 
