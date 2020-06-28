@@ -1,9 +1,7 @@
 #include "../include/Helper_functions.h"
 
-
 int screen_width = 640;
 int screen_height = 480;
-constexpr int ZERO = 0;
 
 enum VAO_ID
 {
@@ -37,7 +35,7 @@ framebufferSizeCallback ( GLFWwindow *window, int width, int height );
 void
 init ()
 {
-	glClearColorfv ( Color: . :darkcyan );
+	glClearColorfv ( Color::darkcyan );
 }
 
 void

@@ -10,11 +10,16 @@
 #include <string>
 #include <vector>
 
+constexpr int ZERO = 0;
+
 /// <summary>
 /// use vec4 set clear color
 /// </summary>
 /// <param name="color"></param>
 void glClearColorfv ( glm::vec4 color );
+
+void glUniformRGBA ( GLint location, glm::vec4 color );
+
 
 class Color
 {
@@ -182,7 +187,7 @@ enum VEC_SIZE
 enum class ERROR_TYPE
 {
 	NullPtr, LinkError, CompileError, FileNotExit,
-	InvalidShader, EmptyString, EmptyMatrixVertex,
+	InvalidShader, InvalidProgram, EmptyString, EmptyMatrixVertex,
 	GLFWFail, WindowFail
 };
 
@@ -286,7 +291,20 @@ public:
 	/// </summary>
 	/// <param name="shader">created shader name</param>
 	/// <param name="filename">file name path</param>
-	static void shaderloader ( GLuint shader, const char *filename );
+	static void shaderLoader ( GLuint shader, const char *filename );
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="shader"></param>
+	static void shaderCompiler ( GLuint shader );
+
+
+	static void shaderAttacher ( GLuint program, GLuint shader );
+
+
+	static void shaderWorker ( GLuint program, GLuint shader, const char *filename );
+
 
 	/// <summary>
 	/// 
@@ -295,6 +313,12 @@ public:
 	/// <param name="filename"></param>
 	static Model vertexLoader ( const char *filename );
 
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="model"></param>
+	/// <param name="filename"></param>
 	static void elementLoader ( Model *model, const char *filename );
 
 

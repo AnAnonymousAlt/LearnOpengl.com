@@ -64,8 +64,8 @@ init ()
 	programs[Program1] = glCreateProgram ();
 	shaders[VShader] = glCreateShader ( GL_VERTEX_SHADER );
 	shaders[FShader1] = glCreateShader ( GL_FRAGMENT_SHADER );
-	Helper::shaderloader ( shaders[VShader], "vertex.glsl" );
-	Helper::shaderloader ( shaders[FShader1], "fragment.glsl" );
+	Helper::shaderLoader ( shaders[VShader], "vertex.glsl" );
+	Helper::shaderLoader ( shaders[FShader1], "fragment.glsl" );
 
 	glAttachShader ( programs[Program1], shaders[VShader] );
 	glAttachShader ( programs[Program1], shaders[FShader1] );
@@ -79,7 +79,7 @@ init ()
 
 	programs[Program2] = glCreateProgram ();
 	shaders[FShader2] = glCreateShader ( GL_FRAGMENT_SHADER );
-	Helper::shaderloader ( shaders[FShader2], "fragment2.glsl" );
+	Helper::shaderLoader ( shaders[FShader2], "fragment2.glsl" );
 
 	glAttachShader ( programs[Program2], shaders[VShader] );
 	glAttachShader ( programs[Program2], shaders[FShader2] );

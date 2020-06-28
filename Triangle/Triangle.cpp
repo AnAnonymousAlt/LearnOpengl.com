@@ -45,8 +45,8 @@ void init ()
 	GLuint program = glCreateProgram ();
 	GLuint vShader = glCreateShader ( GL_VERTEX_SHADER );
 	GLuint fShader = glCreateShader ( GL_FRAGMENT_SHADER );
-	Helper::shaderloader ( vShader, "vertex.glsl" );
-	Helper::shaderloader ( fShader, "fragment.glsl" );
+	Helper::shaderLoader ( vShader, "vertex.glsl" );
+	Helper::shaderLoader ( fShader, "fragment.glsl" );
 
 	glAttachShader ( program, vShader );
 	glAttachShader ( program, fShader );

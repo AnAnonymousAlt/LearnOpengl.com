@@ -151,23 +151,13 @@ const glm::vec4 Color::yellow = { 1.000f, 1.000f, 0.000f, 1.0 };
 const glm::vec4 Color::yellowgreen = { 0.604f, 0.804f, 0.196f, 1.0 };
 
 
+
+
+
 void Helper::print ( const char *info, ERROR_TYPE error,
 					 const char *funcname, int line, const char *filename )
 {
-	std::cerr
-		<< "ERROR: \""						// ERROR: "
-		<< info								// INFO
-		<< "\", \n\nCODE: \""					// ", CODE: "
-		<< errorTranslater ( error )	// error type
-		<< " "								// 
-		<< ( int ) error					// error_code
-		<< "\", at function: \""			// ", at function: "
-		<< funcname							// function name
-		<< "\", \nin file: \""				// ", in file "
-		<< filename							// filename
-		<< "\" line: "						// " line: 
-		<< line								// line number
-		<< std::endl;
+	Helper::print ( ( char * ) info, error, funcname, line, filename );
 }
 
 void Helper::print ( char *info, ERROR_TYPE error,
@@ -207,6 +197,7 @@ std::string Helper::errorTranslater ( ERROR_TYPE error )
 		CASE ( ERROR_TYPE::EmptyMatrixVertex, "EmptyMatrixVertex" );
 		CASE ( ERROR_TYPE::GLFWFail, "GLFWFail" );
 		CASE ( ERROR_TYPE::WindowFail, "WindowFail" );
+		CASE ( ERROR_TYPE::InvalidProgram, "InvalidProgram" );
 		#undef CASE
 	default:
 		return std::string ( "UndefinedERROR" );
@@ -234,7 +225,7 @@ std::string Helper::fileLoader ( const char *filename, GLint *length )
 
 
 
-void Helper::shaderloader ( GLuint shader, const char *filename )
+void Helper::shaderLoader ( GLuint shader, const char *filename )
 {
 	DEBUG ( !glIsShader ( shader ), ERROR_TYPE::InvalidShader );
 	DEBUG ( filename == "", ERROR_TYPE::EmptyString );
@@ -247,9 +238,15 @@ void Helper::shaderloader ( GLuint shader, const char *filename )
 
 	text = s.c_str ();
 	glShaderSource ( shader, 1, &text, &length );
+}
+
+void Helper::shaderCompiler ( GLuint shader )
+{
+	DEBUG ( !glIsShader ( shader ), ERROR_TYPE::InvalidShader );
+	GLint status;
+
 	glCompileShader ( shader );
 
-	GLint status;
 	glGetShaderiv ( shader, GL_COMPILE_STATUS, &status );
 	if ( !status )
 	{
@@ -258,6 +255,23 @@ void Helper::shaderloader ( GLuint shader, const char *filename )
 
 		DEBUGP ( errorLog, ERROR_TYPE::CompileError );
 	}
+}
+
+void Helper::shaderAttacher ( GLuint program, GLuint shader )
+{
+	DEBUG ( !glIsShader ( shader ), ERROR_TYPE::InvalidShader );
+	DEBUG ( !glIsProgram ( program ), ERROR_TYPE::InvalidProgram );
+
+	glAttachShader ( program, shader );
+
+}
+
+void Helper::shaderWorker ( GLuint program, GLuint shader,
+							const char *filename )
+{
+	shaderLoader ( shader, filename );
+	shaderCompiler ( shader );
+	shaderAttacher ( program, shader );
 }
 
 Model Helper::vertexLoader ( const char *filename )
@@ -495,7 +509,12 @@ std::vector<glm::uvec3> Matrix::getElementArray ()
 	return elements;
 }
 
-void glClearColorfv (const glm::vec4 color)
+void glClearColorfv ( const glm::vec4 color )
 {
-	glClearColor (color.r, color.g, color.b, color.a);
+	glClearColor ( color.r, color.g, color.b, color.a );
+}
+
+void glUniformRGBA ( GLint location, glm::vec4 color )
+{
+	glUniform4f ( location, color.r, color.g, color.b, color.a );
 }
