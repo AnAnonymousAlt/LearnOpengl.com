@@ -458,12 +458,14 @@ bool Matrix::addVertex ( glm::vec4 vertex )
 
 int Matrix::vSize ()
 {
-	return ( int ) this->vertices.size ();
+	return ( int )
+		( this->vertices.size () * Helper::typeSize ( GL_FLOAT_VEC4 ) );
 }
 
 int Matrix::eSize ()
 {
-	return ( int ) elements.size ();
+	return ( int )
+		( elements.size () * Helper::typeSize ( GL_UNSIGNED_INT_VEC3 ) );
 }
 
 

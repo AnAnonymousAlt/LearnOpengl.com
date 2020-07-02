@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -255,7 +256,7 @@ public:
 /// </summary>
 /// <param name="a">a void pointer</param>
 /// <returns>void pointer</returns>
-constexpr void *bufferOffset ( void *p )
+constexpr void *bufferOffset ( int p )
 {
 	return ( void * ) p;
 }

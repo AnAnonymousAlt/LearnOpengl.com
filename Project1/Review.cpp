@@ -62,12 +62,9 @@ init ()
 	shaders[FShader0] = glCreateShader ( GL_FRAGMENT_SHADER );
 	Helper::shaderWorker ( programs[Program0], shaders[FShader0], "fragment.glsl" );
 	glLinkProgram ( programs[Program0] );
-	glUseProgram ( programs[Program0] );
 
 	uniforms[Ucolor] = glGetUniformLocation ( programs[Program0], "color" );
-	glUniform4f ( uniforms[Ucolor], 1.0f, 1.0f, 0.0f, 0.0f );
 
-	glUseProgram ( ClearBit );
 
 	mo = Helper::vertexLoader ( "VertexInfo.vi" );
 	Helper::elementLoader ( &mo, "ElementInfo.ei" );
@@ -105,6 +102,7 @@ display ()
 
 	glUseProgram ( programs[Program0] );
 
+	glUniform4f ( uniforms[Ucolor], 1.0f, 1.0f, 0.0f, 0.0f );
 	glBindVertexArray ( VAOs[Triangle] );
 	glDrawElements ( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 	
