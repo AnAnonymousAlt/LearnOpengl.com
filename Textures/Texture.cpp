@@ -54,13 +54,14 @@ Model mo;
 void
 init ()
 {
+	glEnable ( GL_DEPTH );
 	GLfloat vArray[] =
 	{
-		// positions    // color            // texture coords
-		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // top left
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // bot left
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bot right
-		 0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // top right
+		// positions			 // color             // texture coords
+		-0.5f,  0.5f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // top left
+		-0.5f, -0.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // bot left
+		 0.5f, -0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bot right
+		 0.5f,  0.5f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // top right
 	};
 
 	GLuint eArray[] =
@@ -101,18 +102,18 @@ init ()
 						   sizeof ( vArray ),
 						   vArray,
 						   GL_DYNAMIC_STORAGE_BIT );
-	glVertexAttribPointer ( AvPosition, VEC_SIZE::VEC2,
+	glVertexAttribPointer ( AvPosition, VEC_SIZE::VEC3,
 							GL_FLOAT, GL_FALSE,
-							( 2 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
+							( 3 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
 							bufferOffset ( ZERO ) );
 	glEnableVertexAttribArray ( AvPosition );
 	glVertexAttribPointer ( AvColor, VEC_SIZE::VEC3, GL_FLOAT, GL_FALSE,
-							( 2 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
-							bufferOffset ( 2 * Helper::typeSize ( GL_FLOAT ) ) );
+							( 3 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
+							bufferOffset ( 3 * Helper::typeSize ( GL_FLOAT ) ) );
 	glEnableVertexAttribArray ( AvColor );
 	glVertexAttribPointer ( AvTexCoord, VEC_SIZE::VEC2, GL_FLOAT, GL_FALSE,
-							( 2 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
-							bufferOffset ( ( 2 + 3 ) * Helper::typeSize ( GL_FLOAT ) ) );
+							( 3 + 3 + 2 ) * Helper::typeSize ( GL_FLOAT ),
+							bufferOffset ( ( 3 + 3 ) * Helper::typeSize ( GL_FLOAT ) ) );
 	glEnableVertexAttribArray ( AvTexCoord );
 
 	glUseProgram ( programs[Program0] );
@@ -121,7 +122,8 @@ init ()
 	glUniform1i ( uniforms[UsContainer], 0 );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
+					  GL_LINEAR_MIPMAP_LINEAR );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	textureData0 = stbi_load ( "container.jpg", &width, &height,
 							  &nrChannels, 0 );
@@ -135,7 +137,8 @@ init ()
 	glUniform1i ( uniforms[UsFace], 1 );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
+					  GL_LINEAR_MIPMAP_LINEAR );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	stbi_set_flip_vertically_on_load ( true );
 	textureData1 = stbi_load ( "face.png", &width, &height,
@@ -165,7 +168,8 @@ init ()
 void
 display ()
 {
-	glClear ( GL_COLOR_BUFFER_BIT );
+
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glBindVertexArray ( VAOs[Triangle] );
 	glUseProgram ( programs[Program0] );
 	glUniformRGBA ( uniforms[Ucrimson], Color::crimson );
