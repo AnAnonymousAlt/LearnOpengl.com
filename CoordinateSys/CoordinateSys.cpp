@@ -23,7 +23,7 @@ enum Attrib_ID
 
 enum Uniform_id
 {
-	UsContainer, UsFace, numUniforms
+	Umodel, Uview, Uprojection, UsContainer, UsFace, numUniforms
 };
 
 enum Texture_ID
@@ -54,8 +54,9 @@ init ()
 	// Initialize Global gl variables
 	glClearColorfv ( Color::grey );
 	glViewport ( ZERO, ZERO, scr_width, scr_height );
+	glEnable ( GL_DEPTH_TEST );
 
-	// Varaibles Creation
+	// Varaibles Declaration
 	GLfloat vArray[] =
 	{
 		-0.5, -0.5,  0.0,  0.0,  0.0,
@@ -64,6 +65,49 @@ init ()
 		 0.5,  0.5,  0.0,  1.0,  1.0,
 		 0.5, -0.5,  0.0,  1.0,  0.0,
 		-0.5, -0.5,  0.0,  0.0,  0.0
+	};
+	float vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 	GLubyte *texData0, *texData1;
 	GLint width, height, nrChannels;
@@ -84,7 +128,9 @@ init ()
 	// VAOs
 	glBindVertexArray ( vaos[Box] );
 	glBindBuffer ( GL_ARRAY_BUFFER, bfrs[AbBox] );
-	glNamedBufferStorage ( bfrs[AbBox], sizeof ( vArray ), vArray,
+	/*glNamedBufferStorage ( bfrs[AbBox], sizeof ( vArray ), vArray,
+						   GL_DYNAMIC_STORAGE_BIT );*/
+	glNamedBufferStorage ( bfrs[AbBox], sizeof ( vertices ), vertices,
 						   GL_DYNAMIC_STORAGE_BIT );
 	glVertexAttribPointer ( AvPos, VEC_SIZE::VEC3, GL_FLOAT, GL_FALSE,
 							Helper::typeSize ( GL_FLOAT_VEC3 )
@@ -102,6 +148,9 @@ init ()
 	// Uniforms
 	unfs[UsContainer] = glGetUniformLocation ( pgms[PBox], "sContainer" );
 	unfs[UsFace] = glGetUniformLocation ( pgms[PBox], "sFace" );
+	unfs[Umodel] = glGetUniformLocation ( pgms[PBox], "model" );
+	unfs[Uview] = glGetUniformLocation ( pgms[PBox], "view" );
+	unfs[Uprojection] = glGetUniformLocation ( pgms[PBox], "projection" );
 
 	// Textures
 	glActiveTexture ( GL_TEXTURE0 );
@@ -135,17 +184,49 @@ init ()
 				   GL_UNSIGNED_BYTE, texData1 );
 	glGenerateMipmap ( GL_TEXTURE_2D );
 	stbi_image_free ( texData1 );
-	
+
 }
 
 void
 display ()
 {
-	glClear ( GL_COLOR_BUFFER_BIT );
+	// Variables Declaration
+	glm::mat4 model ( 1.0f );
+	glm::mat4 view ( 1.0f );
+	glm::mat4 projection;
+	model = glm::rotate ( model, ( float ) glfwGetTime () * glm::radians ( 50.0f ),
+						  glm::vec3 ( 0.5f, 1.0f, 0.0f ) );
+	view = glm::translate ( view, glm::vec3 ( 0.0f, 0.0f, -4.0f ) );
+	projection = glm::perspective ( glm::radians ( 45.0f ), 1.0f, 1.0f, 100.0f );
+
+	glm::vec3 cubePoss[] = {
+		glm::vec3 ( 0.5f, 0.5f, 0.0f ),
+		glm::vec3 ( -4.5f, -4.5f, -11.0f )
+	};
+
+	// Clear
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+	// Draw
 	glUseProgram ( pgms[PBox] );
 	glBindVertexArray ( vaos[Box] );
-	glDrawArrays ( GL_TRIANGLES, 0, 6 );
+	glUniformMatrix4fv ( unfs[Umodel], 1, GL_FALSE, glm::value_ptr ( model ) );
+	glUniformMatrix4fv ( unfs[Uview], 1, GL_FALSE, glm::value_ptr ( view ) );
+	glUniformMatrix4fv ( unfs[Uprojection], 1, GL_FALSE,
+						 glm::value_ptr ( projection ) );
+	glDrawArrays ( GL_TRIANGLES, 0, 36 );
+	for ( unsigned int i = 0; i < 2; i++ )
+	{
+		glm::mat4 model ( 1.0f );
+		model = glm::translate ( model, cubePoss[i] );
+		model = glm::rotate ( model, glm::radians ( i * 40.0f + 60.0f ),
+							  glm::vec3 ( 1.0f, 1.0f, 1.0f ) );
+		glUniformMatrix4fv ( unfs[Umodel], 1, GL_FALSE, glm::value_ptr ( model ) );
+		glDrawArrays ( GL_TRIANGLES, 0, 36 );
+	}
 	glBindVertexArray ( ClearBit );
+	glUseProgram ( ClearBit );
+
 
 }
 
