@@ -1,7 +1,11 @@
 #pragma once
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 #include <iostream>
@@ -256,7 +260,7 @@ public:
 /// </summary>
 /// <param name="a">a void pointer</param>
 /// <returns>void pointer</returns>
-constexpr void *bufferOffset ( int p )
+constexpr void *bufferOffset ( size_t p )
 {
 	return ( void * ) p;
 }
