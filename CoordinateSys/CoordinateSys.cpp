@@ -23,12 +23,12 @@ enum Attrib_ID
 
 enum Uniform_id
 {
-	UsContainer, numUniforms
+	UsContainer, UsFace, numUniforms
 };
 
 enum Texture_ID
 {
-	TContainer, numTextures
+	TContainer, TFace, numTextures
 };
 
 enum Program_ID
@@ -65,7 +65,7 @@ init ()
 		 0.5, -0.5,  0.0,  1.0,  0.0,
 		-0.5, -0.5,  0.0,  0.0,  0.0
 	};
-	GLubyte *texData;
+	GLubyte *texData0, *texData1;
 	GLint width, height, nrChannels;
 	glCreateVertexArrays ( numVAOs, vaos );
 	glCreateBuffers ( numBuffers, bfrs );
@@ -101,6 +101,7 @@ init ()
 
 	// Uniforms
 	unfs[UsContainer] = glGetUniformLocation ( pgms[PBox], "sContainer" );
+	unfs[UsFace] = glGetUniformLocation ( pgms[PBox], "sFace" );
 
 	// Textures
 	glActiveTexture ( GL_TEXTURE0 );
@@ -113,11 +114,28 @@ init ()
 	glUseProgram ( pgms[PBox] );
 	glUniform1i ( unfs[UsContainer], TContainer );
 	glUseProgram ( ClearBit );
-	texData = stbi_load ( "container.jpg", &width, &height, &nrChannels, 0 );
+	texData0 = stbi_load ( "container.jpg", &width, &height, &nrChannels, 0 );
 	glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-				   GL_UNSIGNED_BYTE, texData );
+				   GL_UNSIGNED_BYTE, texData0 );
 	glGenerateMipmap ( GL_TEXTURE_2D );
-	stbi_image_free ( texData );
+	stbi_image_free ( texData0 );
+	glActiveTexture ( GL_TEXTURE1 );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+					  GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glBindTexture ( GL_TEXTURE_2D, texs[TFace] );
+	glUseProgram ( pgms[PBox] );
+	glUniform1i ( unfs[UsFace], TFace );
+	glUseProgram ( ClearBit );
+	stbi_set_flip_vertically_on_load ( true );
+	texData1 = stbi_load ( "face.png", &width, &height, &nrChannels, 0 );
+	glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA,
+				   GL_UNSIGNED_BYTE, texData1 );
+	glGenerateMipmap ( GL_TEXTURE_2D );
+	stbi_image_free ( texData1 );
+	
 }
 
 void
