@@ -2,10 +2,34 @@
 #include <stb/stb_image.h>
 
 void framebufferSizeFunc ( GLFWwindow *window, int width, int height );
+void processKeyboardInput ( GLFWwindow *window );
+void cursorPosFunc ( GLFWwindow *window, double xpos, double ypos );
 
 const int scr_width = 800;
 const int scr_height = 800;
 
+float lastX = scr_width / 2.0f;
+float lastY = scr_height / 2.0f;
+float sensitivity = 0.1f;
+float yaw = 0.0f;
+float pitch = 0.0f;
+float roll = 0.0f;
+float moveSpeed = 2.0f;
+float rotateSpeed = 45.0f; // 45 degree per sec
+float deltaTime = 0.0f;
+float lastTime = 0.0f;
+bool defaultCamera = true;
+bool firstCursor = true;
+glm::vec3 cameraPos = glm::vec3 ( 0.0f, 0.0f, 6.0f );
+glm::vec3 cameraFront = glm::normalize ( glm::vec3 (
+	sin ( glm::radians ( yaw ) ) * cos ( glm::radians ( pitch ) ),
+	sin ( glm::radians ( pitch ) ) * cos ( glm::radians ( yaw ) ),
+	-cos ( glm::radians ( yaw ) ) * cos ( glm::radians ( pitch ) ) ) );
+// glm::vec3 cameraUp = glm::vec3 ( 0.0f, 1.0f, 0.0f );
+glm::vec3 cameraUp = glm::normalize ( glm::vec3 (
+	sin ( glm::radians ( roll ) ) * cos ( glm::radians ( pitch ) ),
+	cos ( glm::radians ( pitch ) ) * cos ( glm::radians ( roll ) ),
+	sin ( glm::radians ( pitch ) ) * cos ( glm::radians ( roll ) ) ) );
 enum VAO_ID
 {
 	Box, numVAOs
@@ -197,13 +221,20 @@ display ()
 	model = glm::rotate ( model, ( float ) glfwGetTime () * glm::radians ( 50.0f ),
 						  glm::vec3 ( 0.5f, 1.0f, 0.0f ) );
 	float timex = glfwGetTime ();
-	float cx = ( float ) cos ( timex ) * 4.0;
-	float cz = ( float ) sin ( timex ) * 4.0;
-	view = glm::lookAt ( glm::vec3 ( cx + 4, 0.0f, cz + 4 ),
-						 glm::vec3 ( cx, 0.0f, cz - 1.0f ),
-						 glm::vec3 ( 0.0f, 1.0f, 0.0f ) );
-	projection = glm::perspective ( glm::radians ( 45.0f ), 1.0f, 1.0f, 100.0f );
+	float radian = 10.0f;
+	float cx = ( float ) sin ( timex ) * radian;
+	float cz = ( float ) cos ( timex ) * radian;
 
+	if ( defaultCamera )
+	{
+		view = glm::lookAt ( glm::vec3 ( cx, 0.0f, cz ),
+							 glm::vec3 ( 0.0f, 0.0f, 0.0f ),
+							 glm::vec3 ( 0.0f, 1.0f, 0.0f ) );
+	} else
+	{
+		view = glm::lookAt ( cameraPos, cameraPos + cameraFront, cameraUp );
+	}
+	projection = glm::perspective ( glm::radians ( 45.0f ), 1.0f, 0.01f, 100.0f );
 	glm::vec3 cubePoss[] = {
 		glm::vec3 ( 0.5f, 0.5f, 0.0f ),
 		glm::vec3 ( -2.5f, -2.5f, -4.0f )
@@ -252,8 +283,12 @@ main ( int argc, char **argv )
 	gl3wInit ();
 	init ();
 	glfwSetFramebufferSizeCallback ( window, framebufferSizeFunc );
+	glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+	glfwSetCursorPosCallback ( window, cursorPosFunc );
+
 	while ( !glfwWindowShouldClose ( window ) )
 	{
+		processKeyboardInput ( window );
 		display ();
 		glfwSwapBuffers ( window );
 		glfwPollEvents ();
@@ -268,4 +303,156 @@ void
 framebufferSizeFunc ( GLFWwindow *window, int width, int height )
 {
 	glViewport ( 0, 0, width, height );
+}
+
+void processKeyboardInput ( GLFWwindow *window )
+{
+	if ( glfwGetKey ( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
+	{
+		glfwSetWindowShouldClose ( window, true );
+	}
+
+	if ( defaultCamera )
+	{
+		if ( glfwGetKey ( window, GLFW_KEY_ENTER ) == GLFW_PRESS )
+		{
+			defaultCamera = false;
+		}
+		return;
+	}
+	float currentTime = glfwGetTime ();
+	deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+	float deltaMovement = deltaTime * moveSpeed;
+	float deltaRotateYaw = deltaTime * rotateSpeed;
+	float deltaRoll = deltaTime * rotateSpeed;
+	// WSAD space ctrl
+	if ( glfwGetKey ( window, GLFW_KEY_W ) == GLFW_PRESS ||
+		 glfwGetKey ( window, GLFW_KEY_UP ) == GLFW_PRESS )
+	{
+		cameraPos += deltaMovement * cameraFront;
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_S ) == GLFW_PRESS ||
+		 glfwGetKey ( window, GLFW_KEY_DOWN ) == GLFW_PRESS )
+	{
+		cameraPos -= deltaMovement * cameraFront;
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_A ) == GLFW_PRESS )
+	{
+		cameraPos -=
+			deltaMovement *
+			glm::normalize ( glm::cross ( cameraFront, cameraUp ) );
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_D ) == GLFW_PRESS )
+	{
+		cameraPos +=
+			deltaMovement *
+			glm::normalize ( glm::cross ( cameraFront, cameraUp ) );
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_SPACE ) == GLFW_PRESS )
+	{
+		cameraPos += deltaMovement * cameraUp;
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS )
+	{
+		cameraPos -= deltaMovement * cameraUp;
+	}
+
+	// arrow
+	if ( glfwGetKey ( window, GLFW_KEY_RIGHT ) == GLFW_PRESS )
+	{
+		yaw += deltaRotateYaw;
+		glm::vec3 newFront = glm::vec3 ( sin ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ),
+										 sin ( glm::radians ( pitch ) ),
+										 -cos ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ) );
+		cameraFront = glm::normalize ( newFront );
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_LEFT ) == GLFW_PRESS )
+	{
+		yaw -= deltaRotateYaw;
+		glm::vec3 newFront = glm::vec3 ( sin ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ),
+										 sin ( glm::radians ( pitch ) ),
+										 -cos ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ) );
+		cameraFront = glm::normalize ( newFront );
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_E ) == GLFW_PRESS )
+	{
+		roll += deltaRoll;
+		glm::vec3 newUp = glm::vec3 ( sin ( glm::radians ( roll ) )
+									  ,
+									  cos ( glm::radians ( roll ) )
+									  ,
+									  0.0f );
+		cameraUp = glm::normalize ( newUp );
+	}
+	if ( glfwGetKey ( window, GLFW_KEY_R ) == GLFW_PRESS )
+	{
+		roll = 0.0f;
+		pitch = 0.0f;
+		yaw = 0.0f;
+		glm::vec3 newFront = glm::vec3 ( sin ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ),
+										 sin ( glm::radians ( pitch ) ),
+										 -cos ( glm::radians ( yaw ) )
+										 * cos ( glm::radians ( pitch ) ) );
+		glm::vec3 newUp = glm::vec3 ( sin ( glm::radians ( roll ) )
+									  ,
+									  cos ( glm::radians ( roll ) )
+									  ,
+									  0.0f );
+		cameraUp = glm::normalize ( newUp );
+		cameraFront = glm::normalize ( newFront );
+		cameraPos = glm::vec3 ( 0.0f, 0.0f, 6.0f );
+	}
+}
+
+void cursorPosFunc ( GLFWwindow *window, double posX, double posY )
+{
+	if ( defaultCamera )
+	{
+		return;
+	}
+	if ( firstCursor )
+	{
+		firstCursor = false;
+		lastX = posX;
+		lastY = posY;
+		return;
+	}
+	float deltaX = posX - lastX;
+	float deltaY = posY - lastY;
+	deltaY = -deltaY;
+	lastX = posX;
+	lastY = posY;
+	float deltaRotateYaw = deltaX / 500.0f * rotateSpeed;
+	float deltaRotatePitch = deltaY / 500.0f * rotateSpeed;
+	yaw += deltaRotateYaw;
+	pitch += deltaRotatePitch;
+	if ( pitch >= 89.0f )
+	{
+		pitch = 89.0f;
+	}
+	if ( pitch <= -89.0f )
+	{
+		pitch = -89.0f;
+	}
+
+	glm::vec3 newFront = glm::vec3 ( sin ( glm::radians ( yaw ) )
+									 * cos ( glm::radians ( pitch ) ),
+									 sin ( glm::radians ( pitch ) )
+									,
+									 -cos ( glm::radians ( yaw ) )
+									 * cos ( glm::radians ( pitch ) ) );
+	glm::vec3 newUp = glm::vec3 ( sin ( glm::radians ( roll ) )
+								  * cos ( glm::radians ( pitch ) ),
+								  cos ( glm::radians ( roll ) )
+								  * cos ( glm::radians ( pitch ) ),
+								  sin ( glm::radians ( pitch ) )
+								  * cos ( glm::radians ( roll ) ) );
+	cameraFront = glm::normalize ( newFront );
+	cameraUp = glm::normalize ( newUp );
 }
